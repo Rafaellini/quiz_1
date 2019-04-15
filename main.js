@@ -56,7 +56,7 @@ rl.on('line', (line) => {
 	//param Parámetro
 	const text = line.split(' ');
 	let cmd = text[0].toLowerCase().trim();
-	let param = text[1];
+	let param = +text[1];
 
 
  switch (cmd) {
@@ -75,7 +75,7 @@ rl.on('line', (line) => {
     	try {
     		console.log(`\n[${param}] - ${QZ[param].pregunta} : ${QZ[param].respuesta}\n`);
     	}catch(err){
-    		console.log("\nEl id introducido no es correcto\n");
+    		console.log(`El id introducido "${param}" no es correcto`);
     	}
       	break;
     case 'add':
@@ -90,11 +90,54 @@ rl.on('line', (line) => {
     	break; 
     case 'delete':
     	try{
+    		QZ[param].pregunta;
     		QZ.splice(param,1);
     		}catch(err){
-    			console.log("El id introducido no es correcto");
+    			console.log(`El id introducido "${param}" no es correcto`);
     		}
-    	break;  	
+    	break;
+    case 'edit' :
+    	try{
+    		if (process.stdout.isTTY)  {rl.write(QZ[param].pregunta);}
+    		rl.question(`Nueva pregunta: ` , (newPreg) => {
+    			if (process.stdout.isTTY)  {rl.write(QZ[param].respuesta);}
+    			rl.question(`Nueva respuesta: ` , (newResp) => {
+    				QZ[param].pregunta = newPreg;
+    				QZ[param].respuesta = newResp;
+    				rl.prompt();
+    			});
+    		});
+    	}catch(err){
+    		console.log(`El id introducido "${param}" no es correcto`);
+    	}
+    	break;
+    case 'test' :
+    	try{
+    		rl.question(`${QZ[param].pregunta} : `, (res) => {
+    			if (res === QZ[param].respuesta) {
+    				console.log('La respuesta es correcta');
+    				rl.prompt();
+    			}else{
+    				console.log('La respuesta es incorrecta');
+    				rl.prompt();
+    				}
+    			}
+    		);
+    	}catch(err){
+    		console.log(`El id introducido "${param}" no es correcto`);
+    	}
+    	break;	
+    case 'play':
+    case 'p' :
+    	let num; let v = [];
+    	for (let i = 0; v.length < QZ.length;i++){
+    	num = Math.floor(Math.random()*QZ.length);
+    	console.log(`${num} : ${v.indexOf(num)}`);
+    	if (v.indexOf(num) === -1) {v[i] = num;}
+    	}
+    	v.forEach((elem,i) => {console.log(`${i} : ${v[i]}`)});
+    		
+    	break;	  	
     case 'credits':
     	console.log(Autor + '\n');
     	break;
@@ -114,3 +157,5 @@ rl.on('line', (line) => {
 });
 
 // node main.js
+
+// cd "Users/Rafaellini/Documents/Curso Node 2019/quiz"

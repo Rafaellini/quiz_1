@@ -129,14 +129,45 @@ rl.on('line', (line) => {
     	break;	
     case 'play':
     case 'p' :
-    	let num; let v = [];
+
+      
+    	let num; let v = []; let cn = 0; let score = 0;
     	for (let i = 0; v.length < QZ.length;i++){
     	num = Math.floor(Math.random()*QZ.length);
     	console.log(`${num} : ${v.indexOf(num)}`);
-    	if (v.indexOf(num) === -1) {v[i] = num;}
+    	if (v.indexOf(num) === -1) {
+        v[i] = num;
+        }else{
+          for(let j = 0; v[i]===undefined; j++){
+            num = Math.floor(Math.random()*QZ.length);
+            console.log(`j:${j} - ${num} : ${v.indexOf(num)}`);
+            if (v.indexOf(num) === -1) {v[i] = num;}
+
+          }
+        }
     	}
     	v.forEach((elem,i) => {console.log(`${i} : ${v[i]}`)});
-    		
+
+      function play() {
+
+        if (v.length === 0) {
+          console.log(`Fin. Puntuación Final ${score}`);
+          rl.prompt();  
+          }else{
+            rl.question(`${score+1}. ${QZ[score].pregunta}: `, resp => {
+                if(resp === QZ[score].respuesta){
+                  score = score + 1;
+                  v.splice(0,1);
+                  console.log(`Respuesta acertada. Puntuación:  ${score}`);
+                  play();
+                }else{
+                  console.log(`Respuesta incorrecta. Puntuación Final ${score}`);
+                  rl.prompt();
+                }
+            });
+          }
+      }
+      play();
     	break;	  	
     case 'credits':
     	console.log(Autor + '\n');
@@ -159,3 +190,9 @@ rl.on('line', (line) => {
 // node main.js
 
 // cd "Users/Rafaellini/Documents/Curso Node 2019/quiz"
+
+// cd "Documents/Cursos MiríadaX/Curso Node 2019/quiz_1"
+
+
+
+

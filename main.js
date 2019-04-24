@@ -1,62 +1,50 @@
+//Rafael Conde Gómez
+//main.js
+//Módulo principal. Aquí está el objeto interfaz (readline)
+
+
 'use strict'
 
 
+//Llama a los módulos
 const readline = require('readline');
-
-//Definición de variables
-//QZ  La matriz con todos los quizzes
-
-let QZ = [
-			{pregunta:"Capital de España",respuesta:"Madrid"},
-			{pregunta:"Capital de Francia",respuesta:"París"},
-			{pregunta:"Capital de Italia",respuesta:"Roma"},
-			{pregunta:"Capital de Portugal",respuesta:"Lisboa"}
-
-];
+const cmds = require('./cmds.js');
+const  {colorear, log, bigText, errlog} = require('./out.js');
 
 
 
-//LC  Lista de comandos
-
-let LC; 
-LC =  "\nhelp|h -- Lista de comandos \n";
-LC += "list -- Lista de preguntas \n";
-LC += "show <id> -- Muestra la pregunta y la respuesta asociada a dicho <id> \n";
-LC += "add -- Añade un nuevo quiz \n";
-LC += "delete <id> -- Borra el quiz asociado <id> \n";
-LC += "edit <id> -- Edita el quiz asociado <id> \n";
-LC += "test <id> -- Prueba el quiz asociado a <id> \n";
-LC += "play|p -- Juega a Quiz \n";
-LC += "credits -- Muestra los créditos \n";
-LC += "quit|q -- Sale de Quiz \n";
-
-// Autor El texto de los créditos
-
-let Autor = "\n \u00a9 Federico Rafael Conde Gómez";
 
 
 //rl Objeto interfaz
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: 'QUIZ > '
+  prompt: colorear('QUIZ > ', 'blue'),
+  completer: (line) => {
+    const completions = 'h help list show add delete edit test play credits quit q'.split(' ');
+    const hits = completions.filter((c) => c.startsWith(line));
+    // Show all completions if none found
+    return [hits.length ? hits : completions, line];
+  }
 });
 
-console.log();
+
+log('');
+
 
 // Mensaje de bienvenida
-console.log("Juego del Quiz");
+bigText('Juego del Quiz', 'yellow');
+log('');
 rl.prompt();
 
 // Cada vez que escriba una línea y pulse return salta este evento
-
 rl.on('line', (line) => {
 	//Separa el comando del parámetro
 	//cmd Comando
 	//param Parámetro
 	const text = line.split(' ');
 	let cmd = text[0].toLowerCase().trim();
-	let param = +text[1];
+	let param = text[1];
 
 
  switch (cmd) {
@@ -64,132 +52,53 @@ rl.on('line', (line) => {
   		break;
     case 'help':
     case 'h':
-      	console.log(LC);
+      cmds.helpCmd(rl);
       	break;
     case 'list':
-    	console.log();
-    	QZ.forEach((elem,i) => console.log(`[${i}] - ${elem.pregunta}`));
-    	console.log();
+      cmds.listCmd(rl);
       	break;
     case 'show':
-    	try {
-    		console.log(`\n[${param}] - ${QZ[param].pregunta} : ${QZ[param].respuesta}\n`);
-    	}catch(err){
-    		console.log(`El id introducido "${param}" no es correcto`);
-    	}
+    	cmds.showCmd(rl, param);
       	break;
     case 'add':
-    	rl.question('Introduzca una nueva pregunta: ', (preg) => {
-  			rl.question('Ahora introduzca una nueva respuesta: ', (res) =>  {
-  				QZ.push({pregunta: preg, respuesta: res});
-  				console.log("Se ha añadido una pregunta\n");
-  				console.log(`${QZ[QZ.length-1].pregunta} => ${QZ[QZ.length-1].respuesta}`);
-  				rl.prompt();
-  			});
-		});
+    	cmds.addCmd(rl);
     	break; 
     case 'delete':
-    	try{
-    		QZ[param].pregunta;
-    		QZ.splice(param,1);
-    		}catch(err){
-    			console.log(`El id introducido "${param}" no es correcto`);
-    		}
+    	cmds.delCmd(rl, param);
     	break;
     case 'edit' :
-    	try{
-    		if (process.stdout.isTTY)  {rl.write(QZ[param].pregunta);}
-    		rl.question(`Nueva pregunta: ` , (newPreg) => {
-    			if (process.stdout.isTTY)  {rl.write(QZ[param].respuesta);}
-    			rl.question(`Nueva respuesta: ` , (newResp) => {
-    				QZ[param].pregunta = newPreg;
-    				QZ[param].respuesta = newResp;
-    				rl.prompt();
-    			});
-    		});
-    	}catch(err){
-    		console.log(`El id introducido "${param}" no es correcto`);
-    	}
+    	cmds.editCmd(rl, param);
     	break;
     case 'test' :
-    	try{
-    		rl.question(`${QZ[param].pregunta} : `, (res) => {
-    			if (res === QZ[param].respuesta) {
-    				console.log('La respuesta es correcta');
-    				rl.prompt();
-    			}else{
-    				console.log('La respuesta es incorrecta');
-    				rl.prompt();
-    				}
-    			}
-    		);
-    	}catch(err){
-    		console.log(`El id introducido "${param}" no es correcto`);
-    	}
+    	cmds.testCmd(rl, param);
     	break;	
     case 'play':
     case 'p' :
-
-      
-    	let num; let v = []; let cn = 0; let score = 0;
-    	for (let i = 0; v.length < QZ.length;i++){
-    	num = Math.floor(Math.random()*QZ.length);
-    	console.log(`${num} : ${v.indexOf(num)}`);
-    	if (v.indexOf(num) === -1) {
-        v[i] = num;
-        }else{
-          for(let j = 0; v[i]===undefined; j++){
-            num = Math.floor(Math.random()*QZ.length);
-            console.log(`j:${j} - ${num} : ${v.indexOf(num)}`);
-            if (v.indexOf(num) === -1) {v[i] = num;}
-
-          }
-        }
-    	}
-    	v.forEach((elem,i) => {console.log(`${i} : ${v[i]}`)});
-
-      function play() {
-
-        if (v.length === 0) {
-          console.log(`Fin. Puntuación Final ${score}`);
-          rl.prompt();  
-          }else{
-            rl.question(`${score+1}. ${QZ[score].pregunta}: `, resp => {
-                if(resp === QZ[score].respuesta){
-                  score = score + 1;
-                  v.splice(0,1);
-                  console.log(`Respuesta acertada. Puntuación:  ${score}`);
-                  play();
-                }else{
-                  console.log(`Respuesta incorrecta. Puntuación Final ${score}`);
-                  rl.prompt();
-                }
-            });
-          }
-      }
-      play();
+      cmds.playCmd(rl);
     	break;	  	
     case 'credits':
-    	console.log(Autor + '\n');
+    	cmds.creditsCmd(rl);
     	break;
     case 'q':
     case 'quit':
-      rl.close();
+      cmds.quitCmd(rl);
       break;
     default:
-      console.log(`\n '${line.trim()}' no es un comando válido`);
-      console.log('Por favor, pulse h para ver la ayuda\n');
+      errlog(`${line.trim()} no es un comando válido`);
+      log('');
+      log(`Por favor, pulse ${colorear('h','green')} para ver la ayuda`);
+      log('');
       break;
   }
   rl.prompt();
 }).on('close', () => {
-  console.log('\n ¡Gracias por jugar a Quiz! \n');
+  log(colorear('\n ¡Gracias por jugar a Quiz! \n', 'green'));
   process.exit(0);
 });
 
 // node main.js
 
-// cd "Users/Rafaellini/Documents/Curso Node 2019/quiz"
+// cd "Users/Rafaellini/Documents/Curso Node 2019/quiz_1"
 
 // cd "Documents/Cursos MiríadaX/Curso Node 2019/quiz_1"
 
